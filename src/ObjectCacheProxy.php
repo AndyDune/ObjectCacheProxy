@@ -3,8 +3,12 @@
  * Кеширование результатов работы произвольного объекта
  * Принимается объкт и имя запускаемого метода
  *
+ *
+ * About adapters:
+ * https://www.php-fig.org/psr/psr-16/
  */
 namespace AndyDune\ObjectCacheProxy;
+
 class ObjectCacheProxy
 {
     protected $object = null;
@@ -15,9 +19,15 @@ class ObjectCacheProxy
     
     protected $adapter = null;
 
-    protected $_prepareMethods = array();
+    protected $prepareMethods = array();
 
 
+    /**
+     *  Set into the object Simple Cache (PSR-16) adapter.
+     *
+     * ObjectCacheProxy constructor.
+     * @param object $adapter
+     */
     public function __construct($adapter = null)
     {
         $this->adapter = $adapter;
@@ -49,17 +59,17 @@ class ObjectCacheProxy
      * 
      * @param string $name имя вызываемого метода
      * @param array $arguments аргументы
-     * @return \Zend_Db_Table_Rowset 
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
         // Вызван кешируемый метод
-        if ($name == $this->_methodName)
+        if ($name == $this->methodName)
         {
-            $this->_setParams($arguments);
-            return $this->_get();
+            $this->setParams($arguments);
+            return $this->get();
         }
-        return $this->_prepare($name, $arguments);
+        return $this->prepare($name, $arguments);
     }
     
     
@@ -68,15 +78,15 @@ class ObjectCacheProxy
      * Перед запуском основного метода запроса может понадобиться установка параметров.
      * Подготовка к запросу. Эти данные используются для формирования ключа дял кеша.
      *
-     * @param string $method_name имя метода
+     * @param string $methodName имя метода
      * @param array $params неасоц. массив параметров метода
      * @param boolean $spec параметры содержат массивы
-     * @return Db_Cache
+     * @return ObjectCacheProxy
      */
-    protected function prepare($method_name, $params = array())
+    protected function prepare($methodName, $params = array())
     {
-        $this->_prepareMethods[] = array(
-            'method' => $method_name,
+        $this->prepareMethods[] = array(
+            'method' => $methodName,
             'params' => $params
         );
         return $this;
@@ -88,68 +98,75 @@ class ObjectCacheProxy
      * Любое колличесво параметров.
      * В порядке, в каком они будут переданы методу.
      *
-     * @return Db_Cache
+     * @return ObjectCacheProxy
      */
     
     protected function setParams($arguments)
     {
         $this->_parameters = $arguments;
-/*
-        if (func_num_args())
-        {
-            $this->_parameters = func_get_args();
-        }
-  */
         return $this;
     }    
 
     /**
      * Запрос результатов. Реальные либо из кеша.
      *
-     * @return \Zend_Db_Table_Rowset
+     * @return mixed
      */
-    protected function _get()
+    protected function get()
     {
-        $key = $this->_buildCacheKey();
-        $data = $this->_checkCache($key);
-        if ($data)
-            return $data;
+        $key = $this->buildCacheKey();
+        if ($this->adapter->has($key))
+            return $this->adapter->get($key);
 
-        $prepare = $this->_prepareMethods;
+        $prepare = $this->prepareMethods;
         if (count($prepare))
         {
             foreach($prepare as $value)
             {
-                call_user_func_array(array($this->_object, $value['method']), $value['params']);
+                call_user_func_array(array($this->object, $value['method']), $value['params']);
             }
         }
 
-        $data = call_user_func_array(array($this->_object, $this->_methodName), $this->_parameters);
-        $this->_storeCache($key, $data);
+        $data = call_user_func_array(array($this->object, $this->methodName), $this->parameters);
+
+        $this->adapter->set($key, $data);
         return $data;
     }
 
-    protected function _checkCache($key)
-    {
-        $cache = Cache::factory($this->_cacheMode);
-        $data = $cache->load($key);
-        return $data;
-    }
-
-    protected function _buildCacheKey()
+    /**
+     * @return string
+     */
+    protected function buildCacheKey()
     {
         $name = '';
-        $name = $this->_className . '++' . $this->_methodName;
-        $name .= '++' . serialize($this->_parameters);
-        $name .= '++' . serialize($this->_prepareMethods);
-  
+        $name = $this->className . '++' . $this->methodName;
+        $name .= '++' . serialize($this->parameters);
+        $name .= '++' . serialize($this->prepareMethods);
+
 
         return md5($name);
     }
 
-    protected function _storeCache($key, $data)
+
+    /**
+     * @deprecated
+     * @param $key
+     * @return mixed
+     */
+    protected function checkCache($key)
     {
-        $cache = Cache::factory($this->_cacheMode);
+        return $this->adapter->get($key);
+    }
+
+    /**
+     * @deprecated
+     * @param $key
+     * @param $data
+     * @return $this
+     */
+    protected function storeCache($key, $data)
+    {
+        $cache = Cache::factory($this->cacheMode);
         $cache->save($data, $key);
         return $this;
     }
