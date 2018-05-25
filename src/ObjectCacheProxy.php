@@ -61,14 +61,14 @@ class ObjectCacheProxy
     }
 
     /**
-     * Двойственная природа.
+     * It work as:
      * 1. Если вызванный метод равен указанному при созданнии объекта - 
      *    происходит выборка данных. Из кеша или отрабатыается целевой объект.
      * 2. Сохраняется имя метода и его параметры для участия в формировании ключа
      *    кеша и для инициилизации целевого объекта.
      * 
-     * @param string $name имя вызываемого метода
-     * @param array $arguments аргументы
+     * @param string $name method name
+     * @param array $arguments arguments
      * @return mixed
      */
     public function __call($name, $arguments)
