@@ -1,12 +1,20 @@
 <?php
-/*
+/**
  * Кеширование результатов работы произвольного объекта
  * Принимается объкт и имя запускаемого метода
  *
- *
+ * PHP version >= 7.1
  * About adapters:
  * https://www.php-fig.org/psr/psr-16/
+ *
+ * @package andydune/object-cache-proxy
+ * @link  https://github.com/AndyDune/ObjectCacheProxy for the canonical source repository
+ * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
+ * @author Andrey Ryzhov  <info@rznw.ru>
+ * @copyright 2018 Andrey Ryzhov
  */
+
+
 namespace AndyDune\ObjectCacheProxy;
 
 class ObjectCacheProxy
@@ -15,11 +23,13 @@ class ObjectCacheProxy
     protected $methodName = null;
     protected $className = null;
 
-    protected $_parameters = array();
+    protected $parameters = array();
     
     protected $adapter = null;
 
     protected $prepareMethods = array();
+
+    protected $notAllow = false;
 
 
     /**
@@ -63,6 +73,9 @@ class ObjectCacheProxy
      */
     public function __call($name, $arguments)
     {
+        if ($this->notAllow) {
+            return call_user_func_array([$this->object, $name], $arguments);
+        }
         // Вызван кешируемый метод
         if ($name == $this->methodName)
         {
@@ -103,7 +116,7 @@ class ObjectCacheProxy
     
     protected function setParams($arguments)
     {
-        $this->_parameters = $arguments;
+        $this->parameters = $arguments;
         return $this;
     }    
 
@@ -129,6 +142,7 @@ class ObjectCacheProxy
 
         $data = call_user_func_array(array($this->object, $this->methodName), $this->parameters);
 
+        $this->prepareMethods = [];
         $this->adapter->set($key, $data);
         return $data;
     }
@@ -171,6 +185,10 @@ class ObjectCacheProxy
         return $this;
     }
 
-
+    public function setAllow($allow = true)
+    {
+        $this->notAllow = !$allow;
+        return $this;
+    }
 
 }
