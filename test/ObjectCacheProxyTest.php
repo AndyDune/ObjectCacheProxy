@@ -58,6 +58,43 @@ class ObjectCacheProxyTest extends TestCase
         $cache->setAllow(false);
         $this->assertEquals(0, $cache->getLengthDone()); // context didn't work - data from cache
 
+        $tempDir->empty();
+
+        $cache = new ObjectCacheProxy($cacheAdapter);
+        $cache->setObject($this->getObjectForTest(), 'execute');
+        $cache->setCacheKeyMethods('noExist');
+        $cache->setLength(5);
+        $result = $cache->execute();
+        $this->assertCount(5, $result);
+        $this->assertEquals(5, $cache->getLengthDone()); // context worked
+
+        $cache = new ObjectCacheProxy($cacheAdapter);
+        $cache->setObject($this->getObjectForTest(), 'execute');
+        $cache->setCacheKeyMethods('noExist');
+        $cache->setLength(50);
+        $result = $cache->execute();
+        $this->assertCount(5, $result);
+        $this->assertEquals(0, $cache->getLengthDone()); // context worked
+
+
+        $cache = new ObjectCacheProxy($cacheAdapter);
+        $cache->setObject($this->getObjectForTest(), 'execute');
+        $cache->setCacheKeyMethods('setLength');
+        $cache->setLength(6);
+        $result = $cache->execute();
+        $this->assertCount(6, $result);
+        $this->assertEquals(6, $cache->getLengthDone()); // context worked
+
+        $cache = new ObjectCacheProxy($cacheAdapter);
+        $cache->setObject($this->getObjectForTest(), 'execute');
+        $cache->setCacheKeyMethods('setLength');
+        $cache->setLength(6);
+        $result = $cache->execute();
+        $this->assertCount(6, $result);
+        $this->assertEquals(0, $cache->getLengthDone()); // context worked
+
+
+
         $tempDir->delete();
     }
 

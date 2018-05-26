@@ -23,11 +23,13 @@ class ObjectCacheProxy
     protected $methodName = null;
     protected $className = null;
 
-    protected $parameters = array();
-    
+    protected $parameters = [];
+
     protected $adapter = null;
 
-    protected $prepareMethods = array();
+    protected $prepareMethods = [];
+
+    protected $prepareMethodNames = [];
 
     protected $notAllow = false;
 
@@ -45,15 +47,12 @@ class ObjectCacheProxy
 
     public function setObject($object, $methodName)
     {
-        if (is_string($object))
-        {
-            $this->className  = $object;
-            $this->object     = new $object();
-        }
-        else
-        {
-            $this->object     = $object;
-            $this->className  = get_class($object);
+        if (is_string($object)) {
+            $this->className = $object;
+            $this->object = new $object();
+        } else {
+            $this->object = $object;
+            $this->className = get_class($object);
         }
 
         $this->methodName = $methodName;
@@ -61,12 +60,28 @@ class ObjectCacheProxy
     }
 
     /**
-     * It work as:
-     * 1. Если вызванный метод равен указанному при созданнии объекта - 
+     * Set methods names witch will be used for preparation key for cache.
+     *
+     * @param mixed ...$params
+     * @return ObjectCacheProxy
+     */
+    public function setCacheKeyMethods(...$params)
+    {
+        if (is_array($params[0])) {
+            $this->prepareMethodNames = $params[0];
+        }
+        $this->prepareMethodNames = $params;
+        return $this;
+    }
+
+
+    /**
+     * It works as:
+     * 1. Если вызванный метод равен указанному при созданнии объекта -
      *    происходит выборка данных. Из кеша или отрабатыается целевой объект.
      * 2. Сохраняется имя метода и его параметры для участия в формировании ключа
      *    кеша и для инициилизации целевого объекта.
-     * 
+     *
      * @param string $name method name
      * @param array $arguments arguments
      * @return mixed
@@ -77,16 +92,19 @@ class ObjectCacheProxy
             return call_user_func_array([$this->object, $name], $arguments);
         }
         // Вызван кешируемый метод
-        if ($name == $this->methodName)
-        {
+        if ($name == $this->methodName) {
             $this->setParams($arguments);
             return $this->get();
         }
+
+        if ($this->prepareMethodNames and !in_array($name, $this->prepareMethodNames)) {
+            return call_user_func_array([$this->object, $name], $arguments);
+        }
+
         return $this->prepare($name, $arguments);
     }
-    
-    
-    
+
+
     /**
      * Перед запуском основного метода запроса может понадобиться установка параметров.
      * Подготовка к запросу. Эти данные используются для формирования ключа дял кеша.
@@ -113,12 +131,12 @@ class ObjectCacheProxy
      *
      * @return ObjectCacheProxy
      */
-    
+
     protected function setParams($arguments)
     {
         $this->parameters = $arguments;
         return $this;
-    }    
+    }
 
     /**
      * Запрос результатов. Реальные либо из кеша.
@@ -132,10 +150,8 @@ class ObjectCacheProxy
             return $this->adapter->get($key);
 
         $prepare = $this->prepareMethods;
-        if (count($prepare))
-        {
-            foreach($prepare as $value)
-            {
+        if (count($prepare)) {
+            foreach ($prepare as $value) {
                 call_user_func_array(array($this->object, $value['method']), $value['params']);
             }
         }
