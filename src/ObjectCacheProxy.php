@@ -173,32 +173,7 @@ class ObjectCacheProxy
         $name .= '++' . serialize($this->parameters);
         $name .= '++' . serialize($this->prepareMethods);
 
-
         return md5($name);
-    }
-
-
-    /**
-     * @deprecated
-     * @param $key
-     * @return mixed
-     */
-    protected function checkCache($key)
-    {
-        return $this->adapter->get($key);
-    }
-
-    /**
-     * @deprecated
-     * @param $key
-     * @param $data
-     * @return $this
-     */
-    protected function storeCache($key, $data)
-    {
-        $cache = Cache::factory($this->cacheMode);
-        $cache->save($data, $key);
-        return $this;
     }
 
     public function setAllow($allow = true)
