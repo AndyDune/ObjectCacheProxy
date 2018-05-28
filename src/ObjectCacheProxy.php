@@ -17,6 +17,8 @@
 
 namespace AndyDune\ObjectCacheProxy;
 
+use Psr\SimpleCache\CacheInterface;
+
 class ObjectCacheProxy
 {
     protected $object = null;
@@ -38,9 +40,9 @@ class ObjectCacheProxy
      *  Set into the object Simple Cache (PSR-16) adapter.
      *
      * ObjectCacheProxy constructor.
-     * @param object $adapter
+     * @param CacheInterface $adapter
      */
-    public function __construct($adapter = null)
+    public function __construct(CacheInterface $adapter = null)
     {
         $this->adapter = $adapter;
     }

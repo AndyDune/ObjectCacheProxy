@@ -11,6 +11,7 @@
  */
 
 namespace AndyDuneTest\ObjectCacheProxy;
+
 use AndyDune\ObjectCacheProxy\ObjectCacheProxy;
 use PHPUnit\Framework\TestCase;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -20,7 +21,7 @@ class ObjectCacheProxyTest extends TestCase
 {
     public function testProxy()
     {
-          $cache = new ObjectCacheProxy(false);
+        $cache = new ObjectCacheProxy();
         $cache->setAllow(false);
         $cache->setObject($this->getObjectForTest(), 'execute');
 
@@ -94,16 +95,17 @@ class ObjectCacheProxyTest extends TestCase
         $this->assertEquals(0, $cache->getLengthDone()); // context worked
 
 
-
         $tempDir->delete();
     }
 
 
     protected function getObjectForTest()
     {
-        return new class {
+        return new class
+        {
             private $length = 100;
             private $lengthDone = 0;
+
             public function setLength($value)
             {
                 $this->length = $value;
@@ -112,7 +114,7 @@ class ObjectCacheProxyTest extends TestCase
             public function execute()
             {
                 $data = [];
-                for($i = 0; $i < $this->length; $i++) {
+                for ($i = 0; $i < $this->length; $i++) {
                     $this->lengthDone++;
                     $data[] = $i;
                 }
