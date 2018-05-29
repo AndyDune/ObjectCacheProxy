@@ -1,7 +1,7 @@
 <?php
 /**
- * Кеширование результатов работы произвольного объекта
- * Принимается объкт и имя запускаемого метода
+ * Cache results after working any class instance.
+ * It accumulates setter methods, uses it as key for cache. Store results in cache and gets it for the next execution.
  *
  * PHP version >= 7.1
  * About adapters:
