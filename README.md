@@ -72,6 +72,6 @@ $instance->setLimit(13);
 $ways = $instance->get(); 
 ```
 
-`ObjectCacheProxy` gets work class instance and intercept methods call to it. 
+`ObjectCacheProxy` gets work class instance and intercept methods are called to it. 
 It accumulates setter methods and parameters as cache key and executes them at ones before execution method `get`. 
-   
+      

@@ -81,8 +81,7 @@ class ObjectCacheProxy
      * It works as:
      * 1. Если вызванный метод равен указанному при созданнии объекта -
      *    происходит выборка данных. Из кеша или отрабатыается целевой объект.
-     * 2. Сохраняется имя метода и его параметры для участия в формировании ключа
-     *    кеша и для инициилизации целевого объекта.
+     * 2. Save method name and its params for creation cache key
      *
      * @param string $name method name
      * @param array $arguments arguments
@@ -170,7 +169,6 @@ class ObjectCacheProxy
      */
     protected function buildCacheKey()
     {
-        $name = '';
         $name = $this->className . '++' . $this->methodName;
         $name .= '++' . serialize($this->parameters);
         $name .= '++' . serialize($this->prepareMethods);
@@ -178,6 +176,13 @@ class ObjectCacheProxy
         return md5($name);
     }
 
+    /**
+     * Allow or disallow cache.
+     * If disallow this objects works only as proxy.
+     *
+     * @param bool $allow
+     * @return $this
+     */
     public function setAllow($allow = true)
     {
         $this->notAllow = !$allow;
