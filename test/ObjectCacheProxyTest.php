@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * PHP version >= 7.1
+ * PHP version >= 5.6
  *
  * @package andydune/object-cache-proxy
  * @link  https://github.com/AndyDune/ObjectCacheProxy for the canonical source repository
@@ -15,7 +15,7 @@ namespace AndyDuneTest\ObjectCacheProxy;
 use AndyDune\ObjectCacheProxy\Example\Length;
 use AndyDune\ObjectCacheProxy\ObjectCacheProxy;
 use PHPUnit\Framework\TestCase;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
+use AndyDune\ObjectCacheProxy\Example\TemporaryDirectory;
 use Symfony\Component\Cache\Simple\FilesystemCache;
 
 class ObjectCacheProxyTest extends TestCase
@@ -39,7 +39,7 @@ class ObjectCacheProxyTest extends TestCase
 
         $tempDir = new TemporaryDirectory($dir);
         $tempDir->name('cache');
-        $tempDir->empty();
+        $tempDir->emptyDir();
         $cacheAdapter = new FilesystemCache('test', 3600, $tempDir->path());
 
         $cache = new ObjectCacheProxy($cacheAdapter);
@@ -60,7 +60,7 @@ class ObjectCacheProxyTest extends TestCase
         $cache->setAllow(false);
         $this->assertEquals(0, $cache->getLengthDone()); // context didn't work - data from cache
 
-        $tempDir->empty();
+        $tempDir->emptyDir();
 
         $cache = new ObjectCacheProxy($cacheAdapter);
         $cache->setObject($this->getObjectForTest(), 'execute');

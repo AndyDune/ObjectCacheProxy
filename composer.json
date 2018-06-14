@@ -23,7 +23,6 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7.15",
-        "spatie/temporary-directory": "^1.1",
         "symfony/cache": "^3"
     },
     "minimum-stability": "dev",
