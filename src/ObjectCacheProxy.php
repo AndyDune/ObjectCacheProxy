@@ -67,8 +67,9 @@ class ObjectCacheProxy
      * @param mixed ...$params
      * @return ObjectCacheProxy
      */
-    public function setCacheKeyMethods(...$params)
+    public function setCacheKeyMethods()
     {
+        $params = func_get_args();
         if (is_array($params[0])) {
             $this->prepareMethodNames = $params[0];
         }
