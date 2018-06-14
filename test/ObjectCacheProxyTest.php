@@ -12,6 +12,7 @@
 
 namespace AndyDuneTest\ObjectCacheProxy;
 
+use AndyDune\ObjectCacheProxy\Example\Length;
 use AndyDune\ObjectCacheProxy\ObjectCacheProxy;
 use PHPUnit\Framework\TestCase;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -101,35 +102,6 @@ class ObjectCacheProxyTest extends TestCase
 
     protected function getObjectForTest()
     {
-        return new class
-        {
-            private $length = 100;
-            private $lengthDone = 0;
-
-            public function setLength($value)
-            {
-                $this->length = $value;
-            }
-
-            public function execute()
-            {
-                $data = [];
-                for ($i = 0; $i < $this->length; $i++) {
-                    $this->lengthDone++;
-                    $data[] = $i;
-                }
-                return $data;
-            }
-
-            public function getLengthDone()
-            {
-                return $this->lengthDone;
-            }
-
-            public function clean()
-            {
-                $this->lengthDone = 0;
-            }
-        };
+        return new Length();
     }
 }
