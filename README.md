@@ -11,7 +11,7 @@ Allow cache results for execution object method. Transparent to working code.
 Installation
 ------------
 
-Installation using composer:
+Installation with composer:
 
 ```
 composer require andydune/object-cache-proxy
