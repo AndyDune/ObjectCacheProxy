@@ -3,7 +3,7 @@
  * Cache results after working any class instance.
  * It accumulates setter methods, uses it as key for cache. Store results in cache and gets it for the next execution.
  *
- * PHP version >= 7.1
+ * PHP version >= 5.6
  * About adapters:
  * https://www.php-fig.org/psr/psr-16/
  *
@@ -67,8 +67,9 @@ class ObjectCacheProxy
      * @param mixed ...$params
      * @return ObjectCacheProxy
      */
-    public function setCacheKeyMethods(...$params)
+    public function setCacheKeyMethods()
     {
+        $params = func_get_args();
         if (is_array($params[0])) {
             $this->prepareMethodNames = $params[0];
         }
